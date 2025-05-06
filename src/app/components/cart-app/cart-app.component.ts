@@ -11,15 +11,19 @@ import { CartItem } from '../../models/cartItem';
   templateUrl: './cart-app.component.html',
   styleUrl: './cart-app.component.css'
 })
-export class CartAppComponent implements OnInit{
+export class CartAppComponent implements OnInit {
 
   products!: Product[];
   items: CartItem[] = [];
 
-  constructor(private service: ProductService) {}
+  constructor(private service: ProductService) { }
 
   ngOnInit(): void {
     this.products = this.service.findAll();
+  }
+
+  onAddCart(product: Product) {
+    this.items = [... this.items, { product: { ...product }, quantity: 1 }];
   }
 
 }
