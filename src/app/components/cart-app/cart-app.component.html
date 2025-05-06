@@ -1,7 +1,7 @@
 <h2>Product Catalog</h2>
 <app-catalog [products]="products" (productEventEmitter)="onAddCart($event)"/>
 @if (items.length > 0) {
-    <app-cart [items]="items" (idProductEventEmitter)="onDeleteCart($event)"/>
+    <app-cart [items]="items" (idProductEventEmitter)="onDeleteCart($event)" [total]="total"/>
 } @else {
     <div class="alert alert-info">There are no items in the cart</div>
 }
