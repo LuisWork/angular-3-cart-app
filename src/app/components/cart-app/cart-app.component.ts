@@ -5,6 +5,9 @@ import { NavbarComponent } from '../navbar/navbar.component';
 import { Router, RouterOutlet } from '@angular/router';
 import { SharingDataService } from '../../services/sharing-data.service';
 import Swal from 'sweetalert2';
+import { Store } from '@ngrx/store';
+import { ItemsState } from '../../store/items.reducer';
+import { add, remove, total } from '../../store/items.actions';
 
 @Component({
   selector: 'app-cart-app',
@@ -17,20 +20,26 @@ export class CartAppComponent implements OnInit {
   items: CartItem[] = [];
   total: number = 0;
 
-  constructor(private sharingDataService: SharingDataService, private service: ProductService, private router: Router) { }
+  constructor(
+    private sharingDataService: SharingDataService,
+    private router: Router,
+    private store: Store<{ items: ItemsState }>) {
+    this.store.select('items').subscribe(state => {
+      this.items = state.items;
+      this.total = state.total;
+      this.saveSession();
+    })
+  }
 
   ngOnInit(): void {
-    this.items = JSON.parse(sessionStorage.getItem('cart') || '[]');
-    //this.calculateTotal();
     this.onDeleteCart();
     this.onAddCart();
   }
 
   onAddCart(): void {
     this.sharingDataService.productEventEmitter.subscribe(product => {
-
-      //this.calculateTotal();
-      this.saveSession();
+      this.store.dispatch(add({ product }));
+      this.store.dispatch(total());
       this.router.navigate(['/cart'], {
         state: { items: this.items, total: this.total }
       });
@@ -47,8 +56,8 @@ export class CartAppComponent implements OnInit {
         confirmButtonText: "Delete",
       }).then((result) => {
         if (result.isConfirmed) {
-          //this.calculateTotal();
-          this.saveSession();
+          this.store.dispatch(remove({ id: id }));
+          this.store.dispatch(total());
           Swal.fire("The item has been successfully deleted", "", "success");
           this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
             this.router.navigate(['/cart'], {
